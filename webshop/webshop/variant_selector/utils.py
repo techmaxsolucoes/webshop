@@ -9,7 +9,7 @@ from webshop.webshop.variant_selector.item_variants_cache import (
     ItemVariantsCacheManager,
 )
 from erpnext.utilities.product import get_price
-from webshop.shopping_cart.cart import get_party
+from webshop.webshop.shopping_cart.cart import get_party
 
 
 @frappe.whitelist(allow_guest=True)
@@ -170,7 +170,7 @@ def get_item_variant_price_dict(item_code, cart_settings):
                 price_list,
                 cart_settings.default_customer_group,
                 cart_settings.company,
-                party=party,
+                #party=party,
             )
 
             return {"price": price}

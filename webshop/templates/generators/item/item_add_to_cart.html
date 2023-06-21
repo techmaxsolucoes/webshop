@@ -125,9 +125,11 @@
 			const $btn = $(e.currentTarget);
 			$btn.prop('disabled', true);
 			const item_code = $btn.data('item-code');
-			webshop.webshop.shopping_cart.update_cart({
+			frappe.call({
+				method: 'webshop.webshop.shopping_cart.cart.update_cart',
+				args:{
 				item_code,
-				qty: 1,
+				qty: 1},
 				callback(r) {
 					$btn.prop('disabled', false);
 					if (r.message) {

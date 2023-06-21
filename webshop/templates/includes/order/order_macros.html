@@ -4,8 +4,9 @@
 	<div class="row item_name_and_description">
 		<div class="col-xs-4 col-sm-2 order-image-col">
 			<div class="order-image h-100">
-				{% if d.thumbnail or d.image %}
-					{{ product_image(d.thumbnail or d.image, no_border=True) }}
+				{% set web_item = frappe.get_doc("Website Item", {"item_code": d.item_code}) %}
+				{% if web_item.website_image or web_item.thumbnail or d.image %}
+					{{ product_image(web_item.website_image or web_item.thumbnail or d.image, no_border=True) }}
 				{% else %}
 					<div class="no-image-cart-item" style="min-height: 100px;">
 						{{ frappe.utils.get_abbr(d.item_name) or "NA" }}

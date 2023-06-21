@@ -382,7 +382,9 @@ def _get_cart_quotation(party=None):
     if quotation:
         qdoc = frappe.get_doc("Quotation", quotation[0].name)
     else:
-        company = frappe.db.get_value("Webshop Settings", None, ["company"])
+        company = frappe.db.get_value("Webshop Settings", None, "company")
+        if isinstance(company, list) and len(company) :
+            company = company[0]
         qdoc = frappe.get_doc(
             {
                 "doctype": "Quotation",

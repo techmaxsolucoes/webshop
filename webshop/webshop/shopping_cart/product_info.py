@@ -50,7 +50,7 @@ def get_product_info_for_website(item_code, skip_quotation_creation=False):
                 selling_price_list,
                 cart_settings.default_customer_group,
                 cart_settings.company,
-                party=party,
+                #party=party,
             )
 
     stock_status = None
