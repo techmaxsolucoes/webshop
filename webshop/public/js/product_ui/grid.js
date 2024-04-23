@@ -166,7 +166,7 @@ webshop.ProductGrid = class {
 			return `
 				<a href="/${ item.route || '#' }">
 					<div class="btn btn-sm btn-explore-variants w-100 mt-4">
-						${ __('Explore') }
+						${ __('Add to Cart') }
 					</div>
 				</a>
 			`;

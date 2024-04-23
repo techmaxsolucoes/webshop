@@ -161,7 +161,7 @@ webshop.ProductList = class {
 			return `
 				<a href="/${ item.route || '#' }">
 					<div class="btn btn-sm btn-explore-variants btn mb-0 mt-0">
-						${ __('Explore') }
+						${ __('Add to Cart') }
 					</div>
 				</a>
 			`;

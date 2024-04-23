@@ -12,7 +12,7 @@ from webshop.webshop.product_data_engine.query import ProductQuery
 from erpnext.setup.doctype.item_group.item_group import get_child_groups_for_website
 
 
-@frappe.whitelist(allow_guest=True)
+#@frappe.whitelist(allow_guest=True)
 def get_product_filter_data(query_args=None):
     """
     Returns filtered products and discount filters.

@@ -87,6 +87,13 @@ def get_billing_addresses(party=None):
 
 
 @frappe.whitelist()
+def update_cart_info(info):
+    quotation = _get_cart_quotation()
+    quotation.update(frappe.parse_json(info))
+    quotation.flags.ignore_permissions = True
+    quotation.save()
+
+@frappe.whitelist()
 def place_order():
     quotation = _get_cart_quotation()
     cart_settings = frappe.db.get_value(
@@ -110,7 +117,7 @@ def place_order():
 
     sales_order = frappe.get_doc(
         _make_sales_order(
-            quotation.name, customer_group=customer_group, ignore_permissions=True
+            quotation.name, ignore_permissions=True, #customer_group=customer_group
         )
     )
     sales_order.payment_schedule = []
@@ -341,7 +348,7 @@ def decorate_quotation_doc(doc):
             variant_data = frappe.db.get_values(
                 "Item",
                 filters={"item_code": item_code},
-                fieldname=["variant_of", "item_name", "image"],
+                fieldname=["variant_of", "item_name", "website_image"],
                 as_dict=True,
             )[0]
             item_code = variant_data.variant_of
@@ -349,7 +356,7 @@ def decorate_quotation_doc(doc):
             d.web_item_name = variant_data.item_name
 
             if variant_data.image:  # get image from variant or template web item
-                d.thumbnail = variant_data.image
+                d.website_image = variant_data.image
                 fields = fields[2:]
 
         d.update(

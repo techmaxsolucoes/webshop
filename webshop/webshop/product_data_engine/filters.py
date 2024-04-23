@@ -31,7 +31,6 @@ class ProductFiltersBuilder:
 		for df in fields:
 			item_filters, item_or_filters = {"published": 1}, []
 			link_doctype_values = self.get_filtered_link_doctype_records(df)
-
 			if df.fieldtype == "Link":
 				if self.item_group:
 					include_child = frappe.db.get_value("Item Group", self.item_group, "include_descendants")

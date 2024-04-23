@@ -10,6 +10,7 @@ from webshop.webshop.shopping_cart.cart import get_debtors_account
 
 
 def update_debtors_account():
+    from webshop.webshop.shopping_cart.cart import get_party
     doc_type = debtors_account = None
     user = frappe.session.user
 
@@ -31,8 +32,10 @@ def update_debtors_account():
 
     if not doc_type == "Customer":
         return
+    
+    party_name = get_party(user).get('name')
 
-    party = frappe.get_doc(doc_type, user) or create_customer_or_supplier()
+    party = frappe.get_doc(doc_type, party_name) if party_name else create_customer_or_supplier()
 
     if not party:
         return

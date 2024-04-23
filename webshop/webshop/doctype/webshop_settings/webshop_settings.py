@@ -108,7 +108,7 @@ class WebshopSettings(Document):
 
 	def validate_price_list_exchange_rate(self):
 		"Check if exchange rate exists for Price List currency (to Company's currency)."
-		from erpnext.erpnext.setup.utils import get_exchange_rate
+		from erpnext.setup.utils import get_exchange_rate
 
 		if not self.enabled or not self.company or not self.price_list:
 			return  # this function is also called from hooks, check values again

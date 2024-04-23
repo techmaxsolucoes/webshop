@@ -3,7 +3,7 @@
 {% set cart_settings = shopping_cart.cart_settings %}
 {% set product_info = shopping_cart.product_info %}
 
-<div class="item-cart row mt-2" data-variant-item-code="{{ item_code }}">
+<div class="item-cart row mt-2" data-variant-item-code="{{ item_code }}" data-from="webshop">
 	<div class="col-md-12">
 		<!-- Price and Availability -->
 		{% if cart_settings.show_price and product_info.price %}
@@ -34,7 +34,7 @@
 
 		{% if cart_settings.show_stock_availability %}
 		<div class="mt-2">
-			{% if product_info.get("on_backorder") %}
+			{% if not product_info.in_stock and product_info.get("on_backorder") %}
 				<span class="no-stock out-of-stock" style="color: var(--primary-color);">
 					{{ _('Available on backorder') }}
 				</span>

@@ -120,7 +120,12 @@ $.extend(shopping_cart, {
 				newVal = 0;
 
 			if (btn.attr('data-dir') == 'up') {
+				var stockQty = parseInt(input.attr("stock-qty"));
 				newVal = parseInt(oldValue) + 1;
+				if(newVal > stockQty){
+					alert("Out of Stock");
+					return;
+				}
 			} else {
 				if (oldValue > 1) {
 					newVal = parseInt(oldValue) - 1;

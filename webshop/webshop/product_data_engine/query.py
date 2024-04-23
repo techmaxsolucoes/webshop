@@ -5,7 +5,7 @@ import frappe
 from frappe.utils import flt
 
 from webshop.webshop.doctype.item_review.item_review import get_customer
-from webshop.webshop.shopping_cart.product_info import get_product_info_for_website
+from beriotopo.overrides.product_info import get_product_info_for_website
 from erpnext.utilities.product import get_non_stock_item_status
 
 
@@ -135,6 +135,7 @@ class ProductQuery:
 				"Item",
 				fields=["item_code"],
 				filters=[
+					["disabled", "=", 0],
 					["published_in_website", "=", 1],
 					["Item Variant Attribute", "attribute", "=", attribute],
 					["Item Variant Attribute", "attribute_value", "in", values],
@@ -158,6 +159,14 @@ class ProductQuery:
 		"""
 		for field, values in filters.items():
 			if not values or field == "discount":
+				continue
+			if field == 'item_group':
+				item_group_filters = []
+
+				operator = '=' if not isinstance(values, list) else 'in'
+				item_group_filters.append(['Website Item', 'item_group', operator, values])
+				item_group_filters.append(['Website Item Group', 'item_group', operator, values])
+				self.or_filters.extend(item_group_filters)
 				continue
 
 			# handle multiselect fields in filter addition
@@ -228,12 +237,16 @@ class ProductQuery:
 
 			if product_info and product_info["price"]:
 				# update/mutate item and discount_list objects
+				item.stock_qty = product_info.product_info.get("stock_qty")
+				item.show_stock_qty = product_info.product_info.get("show_stock_qty")
+				item.basket_qty = product_info.product_info.get("basket_qty")
 				self.get_price_discount_info(item, product_info["price"], discount_list)
 
 			if self.settings.show_stock_availability:
 				self.get_stock_availability(item)
 
 			item.in_cart = item.item_code in cart_items
+			item.cart_qty = cart_items.get(item.item_code, 0.0)
 
 			item.wished = False
 			if frappe.db.exists(
@@ -241,6 +254,7 @@ class ProductQuery:
 			):
 				item.wished = True
 
+		return result, discount_list
 		return result, discount_list
 
 	def get_price_discount_info(self, item, price_object, discount_list):
@@ -297,9 +311,9 @@ class ProductQuery:
 			)
 			if quotation:
 				items = frappe.get_all(
-					"Quotation Item", fields=["item_code"], filters={"parent": quotation[0].get("name")}
+					"Quotation Item", fields=["item_code", "qty"], filters={"parent": quotation[0].get("name")}
 				)
-				items = [row.item_code for row in items]
+				items = {row.item_code: row.qty for row in items}
 				return items
 
 		return []

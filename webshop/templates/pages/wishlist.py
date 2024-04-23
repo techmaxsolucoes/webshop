@@ -55,28 +55,21 @@ def get_wishlist_items():
 
 
 def set_stock_price_details(items, settings, selling_price_list):
-    for item in items:
-        if settings.show_stock_availability:
-            item.available = get_stock_availability(
-                item.item_code, item.get("warehouse")
-            )
+	for item in items:
+		if settings.show_stock_availability:
+			item.available = get_stock_availability(item.item_code, item.get("warehouse"))
 
-        party = get_party()
+		price_details = get_price(
+			item.item_code, selling_price_list, settings.default_customer_group, settings.company
+		)
 
-        price_details = get_price(
-            item.item_code,
-            selling_price_list,
-            settings.default_customer_group,
-            settings.company,
-            party=party,
-        )
+		if price_details:
+			item.formatted_price = price_details.get("formatted_price")
+			item.formatted_mrp = price_details.get("formatted_mrp")
+			if item.formatted_mrp:
+				item.discount = price_details.get("formatted_discount_percent") or price_details.get(
+					"formatted_discount_rate"
+				)
 
-        if price_details:
-            item.formatted_price = price_details.get("formatted_price")
-            item.formatted_mrp = price_details.get("formatted_mrp")
-            if item.formatted_mrp:
-                item.discount = price_details.get(
-                    "formatted_discount_percent"
-                ) or price_details.get("formatted_discount_rate")
+	return items
 
-    return items

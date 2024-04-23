@@ -217,6 +217,37 @@ $.extend(shopping_cart, {
 		});
 	},
 
+	bind_change_qty: function() {
+		// bind update button
+		$(".product-page").on("change", ".cart-qty", function() {
+			var item_code = $(this).attr("data-item-code");
+			var newVal = $(this).val();
+			this.shopping_cart_update({item_code, qty: newVal});
+		});
+
+		$(".product-page").on('click', '.number-spinner button', function () {
+			var btn = $(this),
+				input = btn.closest('.number-spinner').find('input'),
+				oldValue = input.val().trim(),
+				newVal = 0;
+
+			if (btn.attr('data-dir') == 'up') {
+				newVal = parseInt(oldValue) + 1;
+			} else {
+				if (oldValue > 1) {
+					newVal = parseInt(oldValue) - 1;
+				}
+			}
+			input.val(newVal);
+
+			var item_code = input.attr("data-item-code");
+			this.shopping_cart_update({
+				item_code,
+				qty: newVal
+			});
+		});
+	},
+
 	freeze() {
 		if (window.location.pathname !== "/cart") return;
 
