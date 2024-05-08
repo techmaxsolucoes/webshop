@@ -13,7 +13,12 @@ webshop.ProductGrid = class {
 		}
 
 		this.products_section.empty();
-		this.make();
+		frappe.call('webshop.webshop.api.get_customer').then((res) => {
+			console.log("res-----------", res.message)
+			window.customer_group = res.message
+			this.make();
+		});
+	
 	}
 
 	make() {
@@ -24,7 +29,7 @@ webshop.ProductGrid = class {
 			let title = item.web_item_name || item.item_name || item.item_code || "";
 			title =  title.length > 90 ? title.substr(0, 90) + "..." : title;
 
-			html += `<div class="col-sm-4 item-card"><div class="card text-left">`;
+			html += `<div class="col-sm-3 item-card"><div class="card text-left">`;
 			html += me.get_image_html(item, title);
 			html += me.get_card_body_html(item, title, me.settings);
 			html += `</div></div>`;
@@ -49,9 +54,7 @@ webshop.ProductGrid = class {
 			return `
 				<div class="card-img-container">
 					<a href="/${ item.route || '#' }" style="text-decoration: none;">
-						<div class="card-img-top no-image">
-							${ frappe.get_abbr(title) }
-						</div>
+						<img class="card-img" src="https://cdn-icons-png.flaticon.com/512/10446/10446694.png" alt="${ title }">
 					</a>
 				</div>
 			`;
@@ -160,42 +163,72 @@ webshop.ProductGrid = class {
 
 		return ``;
 	}
-
 	get_primary_button(item, settings) {
 		if (item.has_variants) {
 			return `
 				<a href="/${ item.route || '#' }">
-					<div class="btn btn-sm btn-explore-variants w-100 mt-4">
-						${ __('Add to Cart') }
+					<div class="btn btn-sm btn-explore-variants btn mb-0 mt-0">
+						${ __('Sizes and Prices') }
 					</div>
 				</a>
 			`;
 		} else if (settings.enabled && (settings.allow_items_not_in_stock || item.in_stock)) {
-			return `
-				<div id="${ item.name }" class="btn
-					btn-sm btn-primary btn-add-to-cart-list
-					w-100 mt-2 ${ item.in_cart ? 'hidden' : '' }"
-					data-item-code="${ item.item_code }">
-					<span class="mr-2">
-						<svg class="icon icon-md">
-							<use href="#icon-assets"></use>
-						</svg>
-					</span>
-					${ settings.enable_checkout ? __('Add to Cart') :  __('Add to Quote') }
-				</div>
+			let disabled = item.is_free_item ? 'disabled="disabled"' : '';
 
-				<a href="/cart">
-					<div id="${ item.name }" class="btn
-						btn-sm btn-primary btn-add-to-cart-list
-						w-100 mt-4 go-to-cart-grid
-						${ item.in_cart ? '' : 'hidden' }"
-						data-item-code="${ item.item_code }">
-						${ settings.enable_checkout ? __('Go to Cart') :  __('Go to Quote') }
-					</div>
-				</a>
-			`;
-		} else {
-			return ``;
-		}
+				if (frappe.session.user !== "Guest") {
+					if(!item.in_stock && item.on_back_order === 0){
+						item.stock_qty = 0
+					} else if(!item.in_stock && item.on_back_order > 0){
+						item.stock_qty = item.on_back_order
+					}
+					var basketQuantity = (window.customer_group === "B2C Customer") ? item.b2c_basket_qty : item.basket_qty;
+								
+					let cartQtySection = `
+						<div class="d-flex order-3">
+							<div class="input-group number-spinner mt-1">
+								<div id="custom_basket_quantity" style="position: absolute; opacity: 0;">
+									${basketQuantity}
+								</div>
+								<span class="input-group-prepend d-sm-inline-block qty-border">
+									<button class="btn cart-btn cart-dec" data-dir="dwn">-</button>
+								</span>
+								<input class="form-control text-center cart-qty" value="${item.cart_qty}" data-item-code="${item.item_code}" basket-qty="${item.basket_qty}" stock-qty="${item.stock_qty}" style="max-width: 70px;" ${disabled}>
+								<span class="input-group-append d-sm-inline-block qty-border1">
+									<button class="btn cart-btn cart-inc" data-dir="up">+</button>
+								</span>
+								<button class="btn add-to-cart">
+									<span class="">
+										<svg class="icon icon-md" style="fill: white;">
+											<use href="#icon-assets"></use>
+										</svg>
+									</span>
+									Add to cart
+								</button>
+							</div>
+						</div>
+						<br>`;
+					
+						let basketQtyMessage = item.basket_qty > 1 ? `<p> ${ __("Sold in packs of {0}", [item.basket_qty]) }</p>` : '';
+					
+					return cartQtySection + basketQtyMessage;
+				} else {
+					return `
+						<div id="${ item.name }" class="btn
+							btn-sm btn-primary btn-add-to-cart-list mb-0
+							${ item.in_cart ? 'hidden' : '' }"
+							data-item-code="${ item.item_code }"
+							style="margin-top: 0px !important; max-height: 30px; float: right;
+								padding: 0.25rem 1rem; min-width: 135px;">
+							<span class="mr-2">
+								<svg class="icon icon-md">
+									<use href="#icon-assets"></use>
+								</svg>
+							</span>
+							${ settings.enable_checkout ? __('Add to Cart') :  __('Add to Quote') }
+						</div>`;
+				}
+				} else {
+					return ``;
+				}
 	}
 };

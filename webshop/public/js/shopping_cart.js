@@ -165,9 +165,9 @@ $.extend(shopping_cart, {
 					$(".payment-summary").html(r.message.taxes_and_totals);
 					shopping_cart.set_cart_count();
 
-					if (cart_dropdown != true) {
-						$(".cart-icon").hide();
-					}
+					// if (cart_dropdown != true) {
+					// 	$(".cart-icon").hide();
+					// }
 				}
 			},
 		});
@@ -225,27 +225,40 @@ $.extend(shopping_cart, {
 			this.shopping_cart_update({item_code, qty: newVal});
 		});
 
-		$(".product-page").on('click', '.number-spinner button', function () {
+		$(".product-page").on('click', '.number-spinner .cart-dec', function () {
+			var $input = $(this).closest('.input-group').find('.cart-qty');
+			var custom_basket_quantity = $(this).closest('.number-spinner').find('#custom_basket_quantity').html();
+			var newValue = parseInt($input.val()) - parseInt(custom_basket_quantity);
+			// if (newValue < 1) {
+			// 	newValue = 1;
+			// }
+			$input.val(newValue);
+		});
+
+		$(".product-page").on('click', '.number-spinner .cart-inc', function () {
+			var $input = $(this).closest('.input-group').find('.cart-qty');
+			var custom_basket_quantity = $(this).closest('.number-spinner').find('#custom_basket_quantity').html();
+			console.log("custom_basket_quantity--------", custom_basket_quantity, parseInt($input.val()))
+			var newValue = parseInt($input.val()) + parseInt(custom_basket_quantity);
+			$input.val(newValue);
+		});
+
+		$(".product-page").on('click', '.number-spinner .add-to-cart', function () {
 			var btn = $(this),
-				input = btn.closest('.number-spinner').find('input'),
-				oldValue = input.val().trim(),
-				newVal = 0;
-
-			if (btn.attr('data-dir') == 'up') {
-				newVal = parseInt(oldValue) + 1;
-			} else {
-				if (oldValue > 1) {
-					newVal = parseInt(oldValue) - 1;
-				}
-			}
-			input.val(newVal);
-
+				input = btn.closest('.number-spinner').find('input');
+				oldValue = input.val().trim();
+				newVal = parseInt(oldValue);
+			
+			input.val(newVal); 
+		
 			var item_code = input.attr("data-item-code");
-			this.shopping_cart_update({
+		
+			shopping_cart.update_cart({
 				item_code,
 				qty: newVal
 			});
 		});
+		
 	},
 
 	freeze() {

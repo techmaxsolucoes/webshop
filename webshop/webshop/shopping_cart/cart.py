@@ -13,7 +13,7 @@ from erpnext.accounts.utils import get_account_name
 from webshop.webshop.doctype.webshop_settings.webshop_settings import (
     get_shopping_cart_settings,
 )
-from erpnext.utilities.product import get_web_item_qty_in_stock
+#from erpnext.utilities.product import get_web_item_qty_in_stock
 from erpnext.selling.doctype.quotation.quotation import _make_sales_order
 
 
@@ -132,7 +132,7 @@ def place_order():
             if is_stock_item:
                 item_stock = get_web_item_qty_in_stock(
                     item.item_code, "website_warehouse"
-                )
+                ) or 0.0
                 if not cint(item_stock.in_stock):
                     throw(_("{0} Not in Stock").format(item.item_code))
                 if item.qty > item_stock.stock_qty[0][0]:

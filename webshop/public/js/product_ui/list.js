@@ -54,9 +54,8 @@ webshop.ProductList = class {
 				<div class="col-2 border text-center rounded list-image">
 					<a class="product-link product-list-link" href="/${ item.route || '#' }"
 						style="text-decoration: none">
-						<div class="card-img-top no-image-list">
-							${ frappe.get_abbr(title) }
-						</div>
+						<img itemprop="image" class="website-image h-100 w-100" alt="${ title }"
+							src="https://cdn-icons-png.flaticon.com/512/10446/10446694.png">
 					</a>
 					${ wishlist_enabled ? this.get_wishlist_icon(item): '' }
 				</div>
@@ -161,44 +160,62 @@ webshop.ProductList = class {
 			return `
 				<a href="/${ item.route || '#' }">
 					<div class="btn btn-sm btn-explore-variants btn mb-0 mt-0">
-						${ __('Add to Cart') }
+						${ __('Sizes and Prices') }
 					</div>
 				</a>
 			`;
 		} else if (settings.enabled && (settings.allow_items_not_in_stock || item.in_stock)) {
-			return `
-				<div id="${ item.name }" class="btn
-					btn-sm btn-primary btn-add-to-cart-list mb-0
-					${ item.in_cart ? 'hidden' : '' }"
-					data-item-code="${ item.item_code }"
-					style="margin-top: 0px !important; max-height: 30px; float: right;
-						padding: 0.25rem 1rem; min-width: 135px;">
-					<span class="mr-2">
-						<svg class="icon icon-md">
-							<use href="#icon-assets"></use>
-						</svg>
-					</span>
-					${ settings.enable_checkout ? __('Add to Cart') :  __('Add to Quote') }
-				</div>
-
-				<div class="cart-indicator list-indicator ${item.in_cart ? '' : 'hidden'}">
-					1
-				</div>
-
-				<a href="/cart">
-					<div id="${ item.name }" class="btn
-						btn-sm btn-primary btn-add-to-cart-list
-						ml-4 go-to-cart mb-0 mt-0
-						${ item.in_cart ? '' : 'hidden' }"
-						data-item-code="${ item.item_code }"
-						style="padding: 0.25rem 1rem; min-width: 135px;">
-						${ settings.enable_checkout ? __('Go to Cart') :  __('Go to Quote') }
-					</div>
-				</a>
-			`;
-		} else {
-			return ``;
-		}
+			let disabled = item.is_free_item ? 'disabled="disabled"' : '';
+				if (frappe.session.user !== "Guest") {
+					if(!item.in_stock && item.on_back_order === 0){
+						item.stock_qty = 0
+					} else if(!item.in_stock && item.on_back_order > 0){
+						item.stock_qty = item.on_back_order
+					}
+					let cartQtySection = `
+						<div class="d-flex order-3">
+							<div class="input-group number-spinner mt-1">
+								<span class="input-group-prepend d-sm-inline-block qty-border">
+									<button class="btn cart-btn cart-dec" style="height:33px" data-dir="dwn">-</button>
+								</span>
+								<input class="form-control text-center cart-qty" style="height:35px" value="${item.cart_qty}" data-item-code="${item.item_code}" basket-qty="${item.basket_qty}" stock-qty="${item.stock_qty}" style="max-width: 70px;" ${disabled}>
+								<span class="input-group-append d-sm-inline-block qty-border1">
+									<button class="btn cart-btn cart-inc" style="height:33px" data-dir="up">+</button>
+								</span>
+								<button class="btn add-to-cart" style="width: 130px;padding-top: 5px;">
+								<span class="">
+									<svg class="icon icon-md" style="fill: white;">
+										<use href="#icon-assets"></use>
+									</svg>
+								</span>
+									Add to cart
+								</button>
+							</div>
+						</div>
+						<br>`;
+					
+						let basketQtyMessage = item.basket_qty > 1 ? `<p> ${ __("Sold in packs of {0}", [item.basket_qty]) }</p>` : '';
+					
+					return cartQtySection + basketQtyMessage;
+				} else {
+					return `
+						<div id="${ item.name }" class="btn
+							btn-sm btn-primary btn-add-to-cart-list mb-0
+							${ item.in_cart ? 'hidden' : '' }"
+							data-item-code="${ item.item_code }"
+							style="margin-top: 0px !important; max-height: 30px; float: right;
+								padding: 0.25rem 1rem; min-width: 135px;">
+							<span class="mr-2">
+								<svg class="icon icon-md">
+									<use href="#icon-assets"></use>
+								</svg>
+							</span>
+							${ settings.enable_checkout ? __('Add to Cart') :  __('Add to Quote') }
+						</div>`;
+				}
+				} else {
+					return ``;
+				}
 	}
 
 };

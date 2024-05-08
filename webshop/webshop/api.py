@@ -9,10 +9,10 @@ from frappe.utils import cint
 
 from webshop.webshop.product_data_engine.filters import ProductFiltersBuilder
 from webshop.webshop.product_data_engine.query import ProductQuery
-from erpnext.setup.doctype.item_group.item_group import get_child_groups_for_website
+from webshop.webshop.doctype.override_doctype.item_group import get_child_groups_for_website
 
 
-#@frappe.whitelist(allow_guest=True)
+@frappe.whitelist(allow_guest=True)
 def get_product_filter_data(query_args=None):
     """
     Returns filtered products and discount filters.
@@ -55,17 +55,17 @@ def get_product_filter_data(query_args=None):
 
     engine = ProductQuery()
 
-    try:
-        result = engine.query(
-            attribute_filters,
-            field_filters,
-            search_term=search,
-            start=start,
-            item_group=item_group,
-        )
-    except Exception:
-        frappe.log_error("Product query with filter failed")
-        return {"exc": "Something went wrong!"}
+    # try:
+    result = engine.query(
+        attribute_filters,
+        field_filters,
+        search_term=search,
+        start=start,
+        item_group=item_group,
+    )
+    # except Exception:
+    #     frappe.log_error("Product query with filter failed")
+    #     return {"exc": "Something went wrong!"}
 
     # discount filter data
     filters = {}
@@ -87,3 +87,11 @@ def get_product_filter_data(query_args=None):
 @frappe.whitelist(allow_guest=True)
 def get_guest_redirect_on_action():
     return frappe.db.get_single_value("Webshop Settings", "redirect_on_action")
+
+
+@frappe.whitelist()
+def get_customer():
+    from webshop.webshop.shopping_cart.cart import get_party
+    customer = get_party()
+    
+    return customer.customer_group

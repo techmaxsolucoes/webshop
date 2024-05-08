@@ -8,9 +8,9 @@ from webshop.webshop.doctype.webshop_settings.webshop_settings import (
     show_quantity_in_website,
 )
 from webshop.webshop.shopping_cart.cart import _get_cart_quotation, _set_price_list
-from erpnext.utilities.product import (
+from erpnext.utilities.product import get_price
+from webshop.webshop.utils.product import (
     get_non_stock_item_status,
-    get_price,
     get_web_item_qty_in_stock,
 )
 from webshop.webshop.shopping_cart.cart import get_party

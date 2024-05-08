@@ -21,10 +21,9 @@ from webshop.webshop.redisearch_utils import (
     update_index_for_item,
 )
 from webshop.webshop.shopping_cart.cart import _set_price_list
-from erpnext.setup.doctype.item_group.item_group import (
-    get_parent_item_groups,
-    invalidate_cache_for,
-)
+# from erpnext.setup.doctype.item_group.item_group import (
+#     invalidate_cache_for,
+# )
 from erpnext.stock.doctype.item.item import Item
 from erpnext.utilities.product import get_price
 from webshop.webshop.shopping_cart.cart import get_party
@@ -231,9 +230,10 @@ class WebsiteItem(WebsiteGenerator):
         context.search_link = "/search"
         context.body_class = "product-page"
 
-        context.parents = get_parent_item_groups(
-            self.item_group, from_item=True
-        )  # breadcumbs
+        # context.parents = get_parent_item_groups(
+        #     self.item_group, from_item=True
+        # )  
+        # breadcumbs
         self.attributes = frappe.get_all(
             "Item Variant Attribute",
             fields=["attribute", "attribute_value"],
@@ -451,7 +451,7 @@ def invalidate_cache_for_web_item(doc: Item):
     Args:
         doc (Item): document against which cache should be cleared
     """
-    invalidate_cache_for(doc, doc.item_group)
+    # invalidate_cache_for(doc, doc.item_group)
 
     website_item_groups = list(
         set(
@@ -464,8 +464,8 @@ def invalidate_cache_for_web_item(doc: Item):
         )
     )
 
-    for item_group in website_item_groups:
-        invalidate_cache_for(doc, item_group)
+    # for item_group in website_item_groups:
+    #     invalidate_cache_for(doc, item_group)
 
     # Update Search Cache
     update_index_for_item(doc)

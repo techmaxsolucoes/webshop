@@ -6,7 +6,6 @@ $(() => {
 			this.item_group = is_item_group_page || null;
 
 			let view_type = localStorage.getItem("product_view") || "List View";
-
 			// Render Product Views, Filters & Search
 			new webshop.ProductView({
 				view_type: view_type,

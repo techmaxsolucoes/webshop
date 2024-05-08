@@ -14,7 +14,7 @@ class ProductFiltersBuilder:
 		self.item_group = item_group
 
 	def get_field_filters(self):
-		from erpnext.setup.doctype.item_group.item_group import get_child_groups_for_website
+		from webshop.webshop.doctype.override_doctype.item_group import get_child_groups_for_website
 
 		if not self.item_group and not self.doc.enable_field_filters:
 			return
@@ -74,7 +74,7 @@ class ProductFiltersBuilder:
 			if None in values:
 				values.remove(None)
 
-			if values:
+			if values and values not in filter_data:
 				filter_data.append([df, values])
 
 		return filter_data

@@ -6,7 +6,7 @@ from frappe.utils import flt
 
 from webshop.webshop.doctype.item_review.item_review import get_customer
 from beriotopo.overrides.product_info import get_product_info_for_website
-from erpnext.utilities.product import get_non_stock_item_status
+from webshop.webshop.utils.product import get_non_stock_item_status
 
 
 class ProductQuery:
@@ -120,7 +120,14 @@ class ProductQuery:
 			order_by="ranking desc",
 		)
 
-		return items, count
+		ret_items = []
+		ret_set = set()
+		for item in items:
+			if item.name not in ret_set:
+				ret_set.add(item.name)
+				ret_items.append(item)
+
+		return ret_items, count
 
 	def query_items_with_attributes(self, attributes, start=0):
 		"""Build a query to fetch Website Items based on field & attribute filters."""
@@ -135,7 +142,6 @@ class ProductQuery:
 				"Item",
 				fields=["item_code"],
 				filters=[
-					["disabled", "=", 0],
 					["published_in_website", "=", 1],
 					["Item Variant Attribute", "attribute", "=", attribute],
 					["Item Variant Attribute", "attribute_value", "in", values],
@@ -187,7 +193,7 @@ class ProductQuery:
 
 	def build_item_group_filters(self, item_group):
 		"Add filters for Item group page and include Website Item Groups."
-		from erpnext.setup.doctype.item_group.item_group import get_child_groups_for_website
+		from webshop.webshop.doctype.override_doctype.item_group import get_child_groups_for_website
 
 		item_group_filters = []
 
@@ -235,18 +241,29 @@ class ProductQuery:
 				"product_info"
 			)
 
-			if product_info and product_info["price"]:
-				# update/mutate item and discount_list objects
-				item.stock_qty = product_info.product_info.get("stock_qty")
-				item.show_stock_qty = product_info.product_info.get("show_stock_qty")
-				item.basket_qty = product_info.product_info.get("basket_qty")
+			if product_info and product_info.get("price"):
+				# Check if product_info is a dictionary itself
+				if isinstance(product_info, dict):
+					item.stock_qty = product_info.get("stock_qty")
+					item.show_stock_qty = product_info.get("show_stock_qty")
+					item.basket_qty = product_info.get("basket_qty")
+					item.b2c_basket_qty = product_info.get("b2c_basket_qty")
+				else:
+					# If product_info is nested within another dictionary
+					item.stock_qty = product_info.get("product_info", {}).get("stock_qty")
+					item.show_stock_qty = product_info.get("product_info", {}).get("show_stock_qty")
+					item.basket_qty = product_info.get("product_info", {}).get("basket_qty")
+					item.b2c_basket_qty = product_info.get("b2c_basket_qty")
 				self.get_price_discount_info(item, product_info["price"], discount_list)
 
 			if self.settings.show_stock_availability:
 				self.get_stock_availability(item)
+    
+    
+			cart_items_dict = {cart_item[0]: cart_item[1] for cart_item in cart_items}
 
-			item.in_cart = item.item_code in cart_items
-			item.cart_qty = cart_items.get(item.item_code, 0.0)
+			item.in_cart = item.item_code in cart_items_dict
+			item.cart_qty = cart_items_dict.get(item.item_code, 0.0)
 
 			item.wished = False
 			if frappe.db.exists(
@@ -255,7 +272,8 @@ class ProductQuery:
 				item.wished = True
 
 		return result, discount_list
-		return result, discount_list
+
+
 
 	def get_price_discount_info(self, item, price_object, discount_list):
 		"""Modify item object and add price details."""
